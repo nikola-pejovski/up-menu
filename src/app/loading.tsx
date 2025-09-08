@@ -1,3 +1,5 @@
+"use client";
+
 export default function Loading() {
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center">
@@ -8,8 +10,12 @@ export default function Loading() {
             <img
               src="/logo.png"
               alt="Burger House Logo"
-              className="w-full h-full object-cover rounded-lg scale-110 animate-spin"
+              className="w-full h-full object-contain rounded-lg animate-spin"
               style={{ animationDuration: "3s" }}
+              onError={(e) => {
+                console.error("Logo failed to load:", e);
+                e.currentTarget.style.display = "none";
+              }}
             />
           </div>
           {/* Subtle glow effect */}

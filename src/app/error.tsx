@@ -1,8 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect } from "react";
 
-export default function NotFound() {
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error(error);
+  }, [error]);
+
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center">
       <div className="text-center">
@@ -21,23 +32,17 @@ export default function NotFound() {
         </div>
 
         <h1 className="font-coolvetica text-6xl font-light text-brand-dark tracking-wide mb-4">
-          404
+          Oops!
         </h1>
-
-        <h2 className="font-coolvetica text-2xl font-light text-brand-brown mb-6">
-          Page Not Found
-        </h2>
-
-        <p className="text-brand-dark/70 mb-8 max-w-md mx-auto">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        <p className="text-brand-brown text-lg mb-8 max-w-md mx-auto">
+          Something went wrong. Don&apos;t worry, our chefs are working on it!
         </p>
-
-        <Link
-          href="/"
-          className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-brand-orange to-brand-brown text-white font-medium rounded-xl hover:from-brand-brown hover:to-brand-orange transition-all duration-200 transform hover:scale-105 shadow-lg"
+        <button
+          onClick={reset}
+          className="bg-brand-orange text-white px-8 py-3 rounded-lg font-medium hover:bg-brand-orange/90 transition-colors"
         >
-          Back to Menu
-        </Link>
+          Try Again
+        </button>
       </div>
     </div>
   );

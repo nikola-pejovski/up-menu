@@ -46,7 +46,11 @@ export default function LoginView() {
               <img
                 src="/logo.png"
                 alt="Burger House Logo"
-                className="w-full h-full object-cover rounded-lg scale-110"
+                className="w-full h-full object-contain rounded-lg"
+                onError={(e) => {
+                  console.error("Logo failed to load:", e);
+                  e.currentTarget.style.display = "none";
+                }}
               />
             </div>
             {/* Subtle glow effect */}
