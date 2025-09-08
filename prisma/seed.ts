@@ -1,5 +1,5 @@
 import { PrismaClient, UserRole } from "@prisma/client";
-import { AuthUtils } from "../src/lib/utils/auth.utils";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -7,8 +7,8 @@ async function main() {
   console.log("🌱 Starting database seed...");
 
   // Create admin users
-  const adminPassword = await AuthUtils.hashPassword("admin123");
-  const managerPassword = await AuthUtils.hashPassword("manager123");
+  const adminPassword = await bcrypt.hash("admin123", 12);
+  const managerPassword = await bcrypt.hash("manager123", 12);
 
   const admin = await prisma.adminUser.upsert({
     where: { email: "admin@upmenu.com" },
