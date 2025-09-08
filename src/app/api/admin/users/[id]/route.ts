@@ -1,39 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AuthService } from "@/lib/services/auth.service";
+import { updateAdminUserSchema } from "@/lib/validations/auth.schema";
+import {
+  handleApiError,
+  createSuccessResponse,
+  handleValidationError,
+} from "@/lib/utils/error.utils";
+import { sanitizeBody } from "@/lib/middleware/security.middleware";
+import {
+  authenticate,
+  adminOnly,
+  AuthenticatedRequest,
+} from "@/lib/middleware/auth.middleware";
 
-// Mock admin users - in a real app, this would come from a database
-const mockAdminUsers = [
-  {
-    id: "1",
-    email: "admin@burgerhouse.com",
-    name: "Admin User",
-    role: "admin" as const,
-    isActive: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    id: "2",
-    email: "manager@burgerhouse.com",
-    name: "Manager User",
-    role: "manager" as const,
-    isActive: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-];
+const authService = new AuthService();
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const user = mockAdminUsers.find((user) => user.id === id);
+  try {
+    // Authenticate user
+    const authResponse = authenticate(request);
+    if (authResponse) {
+      return authResponse;
+    }
 
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    // Check admin permissions
+    const adminResponse = adminOnly(request as AuthenticatedRequest);
+    if (adminResponse) {
+      return adminResponse;
+    }
+
+    const { id } = await params;
+    const user = await authService.getUserById(id);
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return createSuccessResponse(user, "User retrieved successfully");
+  } catch (error) {
+    return handleApiError(error, request);
   }
-
-  return NextResponse.json(user);
 }
 
 export async function PUT(
@@ -41,29 +50,33 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const body = await request.json();
-    const userIndex = mockAdminUsers.findIndex((user) => user.id === id);
-
-    if (userIndex === -1) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    // Authenticate user
+    const authResponse = authenticate(request);
+    if (authResponse) {
+      return authResponse;
     }
 
-    const updatedUser = {
-      ...mockAdminUsers[userIndex],
-      ...body,
-      id: id,
-      updatedAt: new Date().toISOString(),
-    };
+    // Check admin permissions
+    const adminResponse = adminOnly(request as AuthenticatedRequest);
+    if (adminResponse) {
+      return adminResponse;
+    }
 
-    mockAdminUsers[userIndex] = updatedUser;
+    const { id } = await params;
+    const body = await request.json();
+    const sanitizedBody = sanitizeBody(body);
 
-    return NextResponse.json(updatedUser);
+    const validationResult = updateAdminUserSchema.safeParse(sanitizedBody);
+    if (!validationResult.success) {
+      return handleValidationError(validationResult.error.issues, request);
+    }
+
+    const userData = validationResult.data;
+    const updatedUser = await authService.updateUser(id, userData);
+
+    return createSuccessResponse(updatedUser, "User updated successfully");
   } catch (error) {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return handleApiError(error, request);
   }
 }
 
@@ -71,14 +84,24 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const userIndex = mockAdminUsers.findIndex((user) => user.id === id);
+  try {
+    // Authenticate user
+    const authResponse = authenticate(request);
+    if (authResponse) {
+      return authResponse;
+    }
 
-  if (userIndex === -1) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    // Check admin permissions
+    const adminResponse = adminOnly(request as AuthenticatedRequest);
+    if (adminResponse) {
+      return adminResponse;
+    }
+
+    const { id } = await params;
+    await authService.deleteUser(id);
+
+    return createSuccessResponse(null, "User deleted successfully");
+  } catch (error) {
+    return handleApiError(error, request);
   }
-
-  mockAdminUsers.splice(userIndex, 1);
-
-  return NextResponse.json({ message: "User deleted successfully" });
 }

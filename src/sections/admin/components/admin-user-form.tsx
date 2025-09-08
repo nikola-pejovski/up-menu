@@ -13,11 +13,38 @@ const userSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .optional(),
-  role: z.enum(["admin", "manager"], {
-    required_error: "Please select a role",
-  }),
+    .optional()
+    .refine(
+      (val) => {
+        // If password is provided, validate it
+        if (val && val.trim()) {
+          return val.length >= 8 && val.length <= 128;
+        }
+        // If empty, it's valid (optional)
+        return true;
+      },
+      {
+        message:
+          "Password must be at least 8 characters and less than 128 characters",
+      }
+    )
+    .refine(
+      (val) => {
+        // If password is provided, validate complexity
+        if (val && val.trim()) {
+          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(
+            val
+          );
+        }
+        // If empty, it's valid (optional)
+        return true;
+      },
+      {
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      }
+    ),
+  role: z.enum(["ADMIN", "MANAGER"]),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -29,6 +56,7 @@ interface AdminUserFormProps {
 
 export default function AdminUserForm({ user, onClose }: AdminUserFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const createMutation = useCreateAdminUser();
   const updateMutation = useUpdateAdminUser();
 
@@ -41,12 +69,14 @@ export default function AdminUserForm({ user, onClose }: AdminUserFormProps) {
     defaultValues: {
       name: user?.name || "",
       email: user?.email || "",
-      role: user?.role || "manager",
+      role: user?.role || "ADMIN",
     },
   });
 
   const onSubmit = async (data: UserFormData) => {
     try {
+      setErrorMessage(""); // Clear previous errors
+
       if (user) {
         // Update existing user
         const updateData: UpdateAdminUserDto = {
@@ -65,7 +95,8 @@ export default function AdminUserForm({ user, onClose }: AdminUserFormProps) {
       } else {
         // Create new user
         if (!data.password) {
-          throw new Error("Password is required for new users");
+          setErrorMessage("Password is required for new users");
+          return;
         }
 
         const createData: CreateAdminUserDto = {
@@ -78,8 +109,19 @@ export default function AdminUserForm({ user, onClose }: AdminUserFormProps) {
         await createMutation.mutateAsync(createData);
       }
       onClose();
-    } catch (error) {
-      // Error handling is done in the mutation
+    } catch (error: any) {
+      console.error("Form submission error:", error);
+
+      // Extract user-friendly error message
+      let message = "An unexpected error occurred";
+
+      if (error?.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error?.message) {
+        message = error.message;
+      }
+
+      setErrorMessage(message);
     }
   };
 
@@ -101,6 +143,11 @@ export default function AdminUserForm({ user, onClose }: AdminUserFormProps) {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-800 text-sm">{errorMessage}</p>
+            </div>
+          )}
           <div>
             <label
               htmlFor="name"
@@ -192,8 +239,8 @@ export default function AdminUserForm({ user, onClose }: AdminUserFormProps) {
               id="role"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
             >
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
+              <option value="MANAGER">Manager</option>
+              <option value="ADMIN">Admin</option>
             </select>
             {errors.role && (
               <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>

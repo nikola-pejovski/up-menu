@@ -1,64 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AuthService } from "@/lib/services/auth.service";
+import { loginSchema } from "@/lib/validations/auth.schema";
+import {
+  handleApiError,
+  createSuccessResponse,
+  handleValidationError,
+} from "@/lib/utils/error.utils";
+import { sanitizeBody } from "@/lib/middleware/security.middleware";
 
-// Mock admin users - in a real app, this would come from a database
-const mockAdminUsers = [
-  {
-    id: "1",
-    email: "admin@burgerhouse.com",
-    password: "admin123", // In real app, this would be hashed
-    name: "Admin User",
-    role: "admin" as const,
-    isActive: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    id: "2",
-    email: "manager@burgerhouse.com",
-    password: "manager123", // In real app, this would be hashed
-    name: "Manager User",
-    role: "manager" as const,
-    isActive: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-];
+const authService = new AuthService();
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    // Get client IP and user agent
+    const ipAddress =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+    // Parse and validate request body
+    const body = await request.json();
+    const sanitizedBody = sanitizeBody(body);
+
+    const validationResult = loginSchema.safeParse(sanitizedBody);
+    if (!validationResult.success) {
+      return handleValidationError(validationResult.error.issues, request);
     }
 
-    const user = mockAdminUsers.find(
-      (u) => u.email === email && u.password === password && u.isActive
+    const { email, password } = validationResult.data;
+
+    // Authenticate user
+    const authResult = await authService.login(
+      { email, password },
+      ipAddress,
+      userAgent
     );
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
-
-    // In a real app, you would generate a proper JWT token
-    const token = `mock-jwt-token-${user.id}-${Date.now()}`;
-
-    const { password: _, ...userWithoutPassword } = user;
-
-    return NextResponse.json({
-      user: userWithoutPassword,
-      token,
-    });
+    return createSuccessResponse(
+      {
+        user: authResult.user,
+        accessToken: authResult.tokens.accessToken,
+        refreshToken: authResult.tokens.refreshToken,
+      },
+      "Login successful"
+    );
   } catch (error) {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return handleApiError(error, request);
   }
 }

@@ -154,7 +154,7 @@ export default function LoginView() {
               </p>
               <div className="text-sm">
                 <p className="text-gray-700">
-                  <strong>Email:</strong> admin@burgerhouse.com
+                  <strong>Email:</strong> admin@upmenu.com
                 </p>
                 <p className="text-gray-700">
                   <strong>Password:</strong> admin123

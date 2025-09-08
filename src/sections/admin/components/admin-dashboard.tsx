@@ -182,7 +182,7 @@ export default function AdminDashboard() {
                         {item.name}
                       </h3>
                       <span className="text-lg font-bold text-orange-600">
-                        ${item.price.toFixed(2)}
+                        ${parseFloat(item.price.toString()).toFixed(2)}
                       </span>
                     </div>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-2">

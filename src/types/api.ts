@@ -88,5 +88,6 @@ export interface LoginDto {
 
 export interface AuthResponse {
   user: AdminUser;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }

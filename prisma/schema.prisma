@@ -1,0 +1,166 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  ROLE_CHANGE
+}
+
+// Admin Users
+model AdminUser {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  role      UserRole   @default(MANAGER)
+  status    UserStatus @default(ACTIVE)
+  lastLogin DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  sessions  Session[]
+  auditLogs AuditLog[]
+
+  @@map("admin_users")
+}
+
+// User Sessions
+model Session {
+  id           String        @id @default(cuid())
+  userId       String
+  token        String        @unique
+  refreshToken String?       @unique
+  status       SessionStatus @default(ACTIVE)
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Menu Categories
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  image       String?
+  slug        String   @unique
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  menuItems MenuItem[]
+
+  @@map("categories")
+}
+
+// Menu Items
+model MenuItem {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal  @db.Decimal(10, 2)
+  image         String?
+  slug          String   @unique
+  categoryId    String?
+  ingredients   String[]
+  allergens     String[]
+  nutritionInfo Json?
+  isAvailable   Boolean  @default(true)
+  isFeatured    Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("menu_items")
+}
+
+// Audit Logs
+model AuditLog {
+  id           String      @id @default(cuid())
+  userId       String?
+  action       AuditAction
+  resourceType String
+  resourceId   String?
+  oldValues    Json?
+  newValues    Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime    @default(now())
+
+  // Relations
+  user AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+// Password Reset Tokens
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+// API Keys for external integrations
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  key         String    @unique
+  permissions String[]
+  isActive    Boolean   @default(true)
+  lastUsed    DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("api_keys")
+}

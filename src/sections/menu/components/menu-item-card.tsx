@@ -28,7 +28,7 @@ export default function MenuItemCard({ item }: MenuItemCardProps) {
             {item.name}
           </h3>
           <span className="text-2xl font-bold text-orange-600">
-            ${item.price.toFixed(2)}
+            ${parseFloat(item.price.toString()).toFixed(2)}
           </span>
         </div>
 

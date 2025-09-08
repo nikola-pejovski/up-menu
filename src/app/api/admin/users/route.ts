@@ -1,49 +1,69 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AuthService } from "@/lib/services/auth.service";
+import { createAdminUserSchema } from "@/lib/validations/auth.schema";
+import {
+  handleApiError,
+  createSuccessResponse,
+  handleValidationError,
+} from "@/lib/utils/error.utils";
+import { sanitizeBody } from "@/lib/middleware/security.middleware";
+import {
+  authenticate,
+  adminOnly,
+  AuthenticatedRequest,
+} from "@/lib/middleware/auth.middleware";
 
-// Mock admin users - in a real app, this would come from a database
-const mockAdminUsers = [
-  {
-    id: "1",
-    email: "admin@burgerhouse.com",
-    name: "Admin User",
-    role: "admin" as const,
-    isActive: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    id: "2",
-    email: "manager@burgerhouse.com",
-    name: "Manager User",
-    role: "manager" as const,
-    isActive: true,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-];
+const authService = new AuthService();
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json(mockAdminUsers);
+  try {
+    // Authenticate user
+    const authResponse = authenticate(request);
+    if (authResponse) {
+      return authResponse;
+    }
+
+    // Check admin permissions
+    const adminResponse = adminOnly(request as AuthenticatedRequest);
+    if (adminResponse) {
+      return adminResponse;
+    }
+
+    const users = await authService.getAllUsers();
+    return createSuccessResponse(users, "Users retrieved successfully");
+  } catch (error) {
+    return handleApiError(error, request);
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const authResponse = authenticate(request);
+    if (authResponse) {
+      return authResponse;
+    }
+
+    // Check admin permissions
+    const adminResponse = adminOnly(request as AuthenticatedRequest);
+    if (adminResponse) {
+      return adminResponse;
+    }
+
+    // Parse and validate request body
     const body = await request.json();
+    const sanitizedBody = sanitizeBody(body);
 
-    const newUser = {
-      id: (mockAdminUsers.length + 1).toString(),
-      ...body,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const validationResult = createAdminUserSchema.safeParse(sanitizedBody);
+    if (!validationResult.success) {
+      return handleValidationError(validationResult.error.issues, request);
+    }
 
-    mockAdminUsers.push(newUser);
+    const userData = validationResult.data;
+    const newUser = await authService.createUser(userData);
 
-    return NextResponse.json(newUser, { status: 201 });
+    return createSuccessResponse(newUser, "User created successfully", 201);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return handleApiError(error, request);
   }
 }

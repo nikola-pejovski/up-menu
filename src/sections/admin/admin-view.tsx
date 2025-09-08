@@ -10,9 +10,17 @@ export default function AdminView() {
   const { data: profile, isLoading, error } = useAdminProfile();
 
   useEffect(() => {
-    // Redirect to login if not authenticated
+    // Debug logging
+    console.log("AdminView - Profile state:", { profile, isLoading, error });
+
+    // Redirect to login if not authenticated (but give it a moment to retry)
     if (error && !isLoading) {
-      router.push("/admin/login");
+      console.log("AdminView - Redirecting to login due to error:", error);
+      const timer = setTimeout(() => {
+        router.push("/admin/login");
+      }, 1000); // Wait 1 second before redirecting
+
+      return () => clearTimeout(timer);
     }
   }, [error, isLoading, router]);
 

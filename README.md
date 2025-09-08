@@ -83,17 +83,38 @@ src/
 
 ## 🚀 **Quick Start**
 
-### **1. Clone & Install**
+### **Option 1: With Docker (Recommended)**
 
 ```bash
+# Clone the repository
 git clone <your-repo-url>
 cd up-menu
+
+# Copy environment file
+cp env.example .env.local
+
+# Start development environment with Docker
+npm run docker:dev
+
+# Install dependencies and start the app
 npm install
+npm run dev
 ```
 
-### **2. Start Development**
+### **Option 2: Local Development**
 
 ```bash
+# Clone the repository
+git clone <your-repo-url>
+cd up-menu
+
+# Install dependencies
+npm install
+
+# Set up your own PostgreSQL database
+# Update .env.local with your database credentials
+
+# Start development server
 npm run dev
 ```
 
@@ -101,11 +122,13 @@ npm run dev
 
 - **Public Menu**: [http://localhost:3000](http://localhost:3000)
 - **Admin Panel**: [http://localhost:3000/admin](http://localhost:3000/admin)
+- **pgAdmin** (Docker only): [http://localhost:5050](http://localhost:5050)
 
 ### **4. Demo Credentials**
 
 - **Email**: admin@burgerhouse.com
 - **Password**: admin123
+- **pgAdmin**: admin@upmenu.com / admin123
 
 ## 📋 **Template Use Cases**
 
@@ -164,9 +187,47 @@ npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
 
+# Docker Commands
+npm run docker:dev           # Start development environment (PostgreSQL + Redis + pgAdmin)
+npm run docker:dev:down      # Stop development environment
+npm run docker:dev:logs      # View development logs
+npm run docker:prod          # Start production environment
+npm run docker:prod:down     # Stop production environment
+npm run docker:build         # Build Docker images
+npm run docker:clean         # Clean up Docker containers and volumes
+npm run db:reset             # Reset development database
+
 # Type checking
 npm run type-check   # Check TypeScript types
 ```
+
+## 🐳 **Docker Configuration**
+
+### **Development Environment**
+
+- **PostgreSQL 15**: Database with sample data
+- **Redis 7**: Caching and session storage
+- **pgAdmin**: Database management interface
+- **Health Checks**: Automatic service monitoring
+
+### **Production Environment**
+
+- **PostgreSQL 15**: Production database
+- **Redis 7**: Production caching
+- **Next.js App**: Containerized application
+- **Persistent Volumes**: Data persistence
+
+### **Database Schema**
+
+The template includes a complete database schema with:
+
+- **Admin Users**: Authentication and authorization
+- **Categories**: Menu categorization
+- **Menu Items**: Product management
+- **Sessions**: User session management
+- **Audit Logs**: Activity tracking
+- **Indexes**: Optimized for performance
+- **Triggers**: Automatic timestamp updates
 
 ## 📚 **Learning Resources**
 

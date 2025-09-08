@@ -18,10 +18,19 @@ export function useAdminLogin() {
   return useMutation({
     mutationFn: (data: LoginDto) => adminLogin(data),
     onSuccess: (data) => {
+      console.log("Login successful, data:", data);
       if (typeof window !== "undefined") {
-        localStorage.setItem("admin_token", data.token);
+        localStorage.setItem("admin_token", data.accessToken);
+        localStorage.setItem("admin_refresh_token", data.refreshToken);
+        console.log("Tokens stored in localStorage");
       }
+      // Set the profile data and invalidate to refetch
       queryClient.setQueryData(["admin-profile"], data.user);
+      queryClient.invalidateQueries({ queryKey: ["admin-profile"] });
+      console.log("Profile data set in query cache");
+    },
+    onError: (error) => {
+      console.error("Login failed:", error);
     },
   });
 }
@@ -34,6 +43,7 @@ export function useAdminLogout() {
     onSuccess: () => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_refresh_token");
       }
       // Clear all queries and reset the profile
       queryClient.clear();
@@ -43,6 +53,7 @@ export function useAdminLogout() {
       // Even if the API call fails, clear local data
       if (typeof window !== "undefined") {
         localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_refresh_token");
       }
       queryClient.clear();
       queryClient.setQueryData(["admin-profile"], null);
