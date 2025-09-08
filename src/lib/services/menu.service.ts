@@ -42,6 +42,36 @@ export interface PaginatedResult<T> {
 
 export class MenuService {
   /**
+   * Retry database operation with exponential backoff
+   */
+  private async retryDatabaseOperation<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: Error;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(
+          `Database operation failed (attempt ${attempt + 1}/${maxRetries}):`,
+          error
+        );
+
+        if (attempt < maxRetries - 1) {
+          const delay = baseDelay * Math.pow(2, attempt);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+
+    throw lastError!;
+  }
+
+  /**
    * Create a new category
    */
   async createCategory(data: CreateCategoryInput): Promise<Category> {
@@ -96,22 +126,24 @@ export class MenuService {
     const orderBy: Prisma.CategoryOrderByWithRelationInput = {};
     orderBy[sortBy] = sortOrder;
 
-    // Get categories with count
+    // Get categories with count and retry logic
     const [categories, total] = await Promise.all([
-      prisma.category.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: {
-          _count: {
-            select: {
-              menuItems: true,
+      this.retryDatabaseOperation(() =>
+        prisma.category.findMany({
+          where,
+          orderBy,
+          skip,
+          take: limit,
+          include: {
+            _count: {
+              select: {
+                menuItems: true,
+              },
             },
           },
-        },
-      }),
-      prisma.category.count({ where }),
+        })
+      ),
+      this.retryDatabaseOperation(() => prisma.category.count({ where })),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -362,18 +394,20 @@ export class MenuService {
     const orderBy: Prisma.MenuItemOrderByWithRelationInput = {};
     orderBy[sortBy] = sortOrder;
 
-    // Get menu items with count
+    // Get menu items with count and retry logic
     const [menuItems, total] = await Promise.all([
-      prisma.menuItem.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: {
-          category: true,
-        },
-      }),
-      prisma.menuItem.count({ where }),
+      this.retryDatabaseOperation(() =>
+        prisma.menuItem.findMany({
+          where,
+          orderBy,
+          skip,
+          take: limit,
+          include: {
+            category: true,
+          },
+        })
+      ),
+      this.retryDatabaseOperation(() => prisma.menuItem.count({ where })),
     ]);
 
     const totalPages = Math.ceil(total / limit);
