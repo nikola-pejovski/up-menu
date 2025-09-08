@@ -5,6 +5,7 @@ A **production-ready template** for building scalable, robust web applications w
 ## 🚀 **Template Features**
 
 ### **Architecture & Structure**
+
 - **Next.js 15** with App Router and Turbopack
 - **TypeScript** for type safety and better DX
 - **Modular Architecture** following enterprise patterns
@@ -12,6 +13,7 @@ A **production-ready template** for building scalable, robust web applications w
 - **Scalable Project Structure** ready for large applications
 
 ### **Frontend Excellence**
+
 - **Tailwind CSS 3.4** for modern, responsive design
 - **React Query** for efficient server state management
 - **React Hook Form + Zod** for robust form validation
@@ -19,12 +21,14 @@ A **production-ready template** for building scalable, robust web applications w
 - **Custom Components** with fallback handling
 
 ### **Authentication & Security**
+
 - **Token-based Authentication** with Axios interceptors
 - **Protected Routes** with automatic redirects
 - **Secure Login Flow** with proper error handling
 - **Session Management** with localStorage integration
 
 ### **Admin Panel System**
+
 - **Complete CRUD Operations** for all entities
 - **Real-time Updates** with optimistic UI
 - **Form Validation** with comprehensive error handling
@@ -65,21 +69,22 @@ src/
 
 ## 🛠️ **Tech Stack**
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Next.js** | 15.5.2 | React framework with App Router |
-| **TypeScript** | Latest | Type safety and developer experience |
-| **Tailwind CSS** | 3.4.0 | Utility-first CSS framework |
-| **React Query** | Latest | Server state management |
-| **React Hook Form** | Latest | Form handling and validation |
-| **Zod** | Latest | Schema validation |
-| **Radix UI** | Latest | Accessible UI primitives |
-| **Axios** | Latest | HTTP client with interceptors |
-| **Lucide React** | Latest | Icon library |
+| Technology          | Version | Purpose                              |
+| ------------------- | ------- | ------------------------------------ |
+| **Next.js**         | 15.5.2  | React framework with App Router      |
+| **TypeScript**      | Latest  | Type safety and developer experience |
+| **Tailwind CSS**    | 3.4.0   | Utility-first CSS framework          |
+| **React Query**     | Latest  | Server state management              |
+| **React Hook Form** | Latest  | Form handling and validation         |
+| **Zod**             | Latest  | Schema validation                    |
+| **Radix UI**        | Latest  | Accessible UI primitives             |
+| **Axios**           | Latest  | HTTP client with interceptors        |
+| **Lucide React**    | Latest  | Icon library                         |
 
 ## 🚀 **Quick Start**
 
 ### **1. Clone & Install**
+
 ```bash
 git clone <your-repo-url>
 cd up-menu
@@ -87,21 +92,25 @@ npm install
 ```
 
 ### **2. Start Development**
+
 ```bash
 npm run dev
 ```
 
 ### **3. Access the Application**
+
 - **Public Menu**: [http://localhost:3000](http://localhost:3000)
 - **Admin Panel**: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ### **4. Demo Credentials**
+
 - **Email**: admin@burgerhouse.com
 - **Password**: admin123
 
 ## 📋 **Template Use Cases**
 
 ### **Perfect For:**
+
 - **Restaurant/Cafe Menus** with admin management
 - **E-commerce Catalogs** with product management
 - **Content Management Systems** with user roles
@@ -109,6 +118,7 @@ npm run dev
 - **Admin Panels** for any business application
 
 ### **Easy Customization:**
+
 - **Replace menu items** with your products/services
 - **Update branding** and color scheme
 - **Add new entities** following the established patterns
@@ -118,24 +128,28 @@ npm run dev
 ## 🎯 **Key Patterns Demonstrated**
 
 ### **1. Scalable Architecture**
+
 - **Section-based Views** instead of page components
 - **Centralized API Layer** with typed endpoints
 - **Query-based State Management** with React Query
 - **Type-safe Development** with comprehensive TypeScript
 
 ### **2. Authentication Flow**
+
 - **Protected Routes** with automatic redirects
 - **Token Management** with Axios interceptors
 - **Session Persistence** with localStorage
 - **Error Handling** for auth failures
 
 ### **3. Form Management**
+
 - **Validation Schemas** with Zod
 - **Error Handling** with user-friendly messages
 - **Loading States** for better UX
 - **Optimistic Updates** for instant feedback
 
 ### **4. Component Design**
+
 - **Reusable Components** with proper props
 - **Fallback Handling** for images and errors
 - **Responsive Design** with mobile-first approach
@@ -157,6 +171,7 @@ npm run type-check   # Check TypeScript types
 ## 📚 **Learning Resources**
 
 This template demonstrates:
+
 - **Next.js 15** App Router patterns
 - **React Query** for server state
 - **TypeScript** best practices
