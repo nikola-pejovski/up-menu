@@ -13,6 +13,7 @@ export function middleware(request: NextRequest) {
       "http://localhost:3000",
       "http://localhost:3001",
       "https://up-menu.vercel.app", // Add your Vercel domain here
+      "https://menu.nikolapejovski.com", // Add your production domain
       process.env.CORS_ORIGIN || "http://localhost:3000",
     ];
 
