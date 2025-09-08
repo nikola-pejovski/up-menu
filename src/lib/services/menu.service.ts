@@ -46,14 +46,23 @@ export class MenuService {
    */
   private async retryDatabaseOperation<T>(
     operation: () => Promise<T>,
-    maxRetries: number = 3,
-    baseDelay: number = 1000
+    maxRetries: number = 2,
+    baseDelay: number = 500
   ): Promise<T> {
     let lastError: Error;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        return await operation();
+        // Add timeout to prevent hanging
+        return await Promise.race([
+          operation(),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Database operation timeout")),
+              8000
+            )
+          ),
+        ]);
       } catch (error) {
         lastError = error as Error;
         console.warn(
@@ -386,7 +395,6 @@ export class MenuService {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
-        { ingredients: { has: search } },
       ];
     }
 
@@ -394,20 +402,15 @@ export class MenuService {
     const orderBy: Prisma.MenuItemOrderByWithRelationInput = {};
     orderBy[sortBy] = sortOrder;
 
-    // Get menu items with count and retry logic
+    // Get menu items with count
     const [menuItems, total] = await Promise.all([
-      this.retryDatabaseOperation(() =>
-        prisma.menuItem.findMany({
-          where,
-          orderBy,
-          skip,
-          take: limit,
-          include: {
-            category: true,
-          },
-        })
-      ),
-      this.retryDatabaseOperation(() => prisma.menuItem.count({ where })),
+      prisma.menuItem.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prisma.menuItem.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / limit);
