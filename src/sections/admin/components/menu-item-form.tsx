@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   MenuItem,
   MenuCategory,
-  CreateMenuItemDto,
-  UpdateMenuItemDto,
 } from "@/types/api";
 import { useCreateMenuItem, useUpdateMenuItem } from "@/use-queries/menu";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus } from "lucide-react";
+import CustomSelect from "@/components/ui/custom-select";
 
 const menuItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,6 +19,7 @@ const menuItemSchema = z.object({
   image: z.string().url("Please enter a valid image URL"),
   category: z.string().min(1, "Category is required"),
   isAvailable: z.boolean(),
+  isFeatured: z.boolean().optional(),
   ingredients: z.array(z.string()).optional(),
   allergens: z.array(z.string()).optional(),
 });
@@ -52,6 +52,7 @@ export default function MenuItemForm({
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<MenuItemFormData>({
     resolver: zodResolver(menuItemSchema),
     defaultValues: {
@@ -59,8 +60,12 @@ export default function MenuItemForm({
       description: item?.description || "",
       price: item?.price || 0,
       image: item?.image || "",
-      category: item?.category || "",
+      category:
+        typeof item?.category === "string"
+          ? item.category
+          : item?.category?.id || "",
       isAvailable: item?.isAvailable ?? true,
+      isFeatured: item?.isFeatured ?? false,
       ingredients: item?.ingredients || [],
       allergens: item?.allergens || [],
     },
@@ -109,16 +114,39 @@ export default function MenuItemForm({
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
+  // Update form values when item changes (for editing)
+  useEffect(() => {
+    if (item) {
+      setValue("name", item.name);
+      setValue("description", item.description);
+      setValue("price", item.price);
+      setValue("image", item.image);
+      setValue(
+        "category",
+        typeof item.category === "string"
+          ? item.category
+          : item.category?.id || ""
+      );
+      setValue("isAvailable", item.isAvailable);
+      setValue("isFeatured", item.isFeatured || false);
+      setIngredients(item.ingredients || []);
+      setAllergens(item.allergens || []);
+    }
+  }, [item, setValue]);
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {item ? "Edit Menu Item" : "Add Menu Item"}
-          </h2>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20">
+        <div className="flex items-center justify-between p-6 border-b border-brand-orange/20">
+          <div>
+            <h2 className="font-coolvetica text-2xl font-light text-brand-dark tracking-wide">
+              {item ? "Edit Menu Item" : "Add Menu Item"}
+            </h2>
+            <div className="h-px w-16 bg-gradient-to-r from-brand-orange to-transparent mt-2"></div>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2.5 hover:bg-brand-cream/50 rounded-xl transition-all duration-200 text-brand-brown/60 hover:text-brand-brown"
           >
             <X className="w-5 h-5" />
           </button>
@@ -127,12 +155,12 @@ export default function MenuItemForm({
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
                 Name *
               </label>
               <input
                 {...register("name")}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200"
                 placeholder="Burger Name"
               />
               {errors.name && (
@@ -143,14 +171,14 @@ export default function MenuItemForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
                 Price *
               </label>
               <input
                 {...register("price", { valueAsNumber: true })}
                 type="number"
                 step="0.01"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200"
                 placeholder="0.00"
               />
               {errors.price && (
@@ -162,13 +190,13 @@ export default function MenuItemForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
               Description *
             </label>
             <textarea
               {...register("description")}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200"
               placeholder="Describe the menu item..."
             />
             {errors.description && (
@@ -179,13 +207,13 @@ export default function MenuItemForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
               Image URL *
             </label>
             <input
               {...register("image")}
               type="url"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200"
               placeholder="https://example.com/image.jpg"
             />
             {errors.image && (
@@ -196,20 +224,21 @@ export default function MenuItemForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
               Category *
             </label>
-            <select
-              {...register("category")}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            >
-              <option value="">Select a category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <CustomSelect
+              options={[
+                { value: "", label: "Select a category" },
+                ...categories.map((category) => ({
+                  value: category.id,
+                  label: category.name,
+                })),
+              ]}
+              value={watch("category") || ""}
+              onChange={(value) => setValue("category", value)}
+              placeholder="Select a category"
+            />
             {errors.category && (
               <p className="mt-1 text-sm text-red-600">
                 {errors.category.message}
@@ -217,28 +246,43 @@ export default function MenuItemForm({
             )}
           </div>
 
-          <div>
-            <label className="flex items-center space-x-3">
-              <input
-                {...register("isAvailable")}
-                type="checkbox"
-                className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                Available
-              </span>
-            </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="flex items-center space-x-3">
+                <input
+                  {...register("isAvailable")}
+                  type="checkbox"
+                  className="w-5 h-5 text-brand-orange border-gray-300 rounded focus:ring-brand-orange/20"
+                />
+                <span className="text-sm font-medium text-brand-dark font-coolvetica">
+                  Available
+                </span>
+              </label>
+            </div>
+
+            <div>
+              <label className="flex items-center space-x-3">
+                <input
+                  {...register("isFeatured")}
+                  type="checkbox"
+                  className="w-5 h-5 text-brand-orange border-gray-300 rounded focus:ring-brand-orange/20"
+                />
+                <span className="text-sm font-medium text-brand-dark font-coolvetica">
+                  Featured Item
+                </span>
+              </label>
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
               Ingredients
             </label>
             <div className="flex gap-2 mb-3">
               <input
                 value={newIngredient}
                 onChange={(e) => setNewIngredient(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200"
                 placeholder="Add ingredient"
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addIngredient())
@@ -247,7 +291,7 @@ export default function MenuItemForm({
               <button
                 type="button"
                 onClick={addIngredient}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white rounded-xl hover:from-brand-brown hover:via-brand-orange hover:to-brand-brown transition-all duration-300 shadow-lg"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -256,7 +300,7 @@ export default function MenuItemForm({
               {ingredients.map((ingredient, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1 bg-brand-cream/80 text-brand-brown border border-brand-orange/30 rounded-full text-sm"
                 >
                   {ingredient}
                   <button
@@ -272,14 +316,14 @@ export default function MenuItemForm({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-brand-dark font-coolvetica mb-2">
               Allergens
             </label>
             <div className="flex gap-2 mb-3">
               <input
                 value={newAllergen}
                 onChange={(e) => setNewAllergen(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200"
                 placeholder="Add allergen"
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addAllergen())
@@ -288,7 +332,7 @@ export default function MenuItemForm({
               <button
                 type="button"
                 onClick={addAllergen}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white rounded-xl hover:from-brand-brown hover:via-brand-orange hover:to-brand-brown transition-all duration-300 shadow-lg"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -297,7 +341,7 @@ export default function MenuItemForm({
               {allergens.map((allergen, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-2 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
+                  className="inline-flex items-center gap-2 px-3 py-1 bg-red-50/80 text-red-700 border border-red-200/50 rounded-full text-sm"
                 >
                   {allergen}
                   <button
@@ -316,14 +360,14 @@ export default function MenuItemForm({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 px-6 py-3 border border-gray-200/50 text-brand-dark rounded-xl hover:bg-brand-cream/50 transition-all duration-200 font-coolvetica"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 bg-orange-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white py-3 px-6 rounded-xl font-medium hover:from-brand-brown hover:via-brand-orange hover:to-brand-brown focus:ring-2 focus:ring-brand-orange/50 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg font-coolvetica"
             >
               {isLoading ? "Saving..." : item ? "Update Item" : "Add Item"}
             </button>

@@ -112,7 +112,7 @@ async function main() {
         description:
           "Toasted bread topped with fresh tomatoes, basil, and garlic",
         image:
-          "https://images.unsplash.com/photo-1572441713132-51c75654db73?w=800&h=600&fit=crop",
+          "https://images.unsplash.com/photo-1572441713132-51c75654db73?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
         price: 8.99,
         categoryId: categories[0].id,
         isAvailable: true,

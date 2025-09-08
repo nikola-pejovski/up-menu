@@ -7,7 +7,7 @@ import {
   useDeleteMenuItem,
 } from "@/use-queries/menu";
 import { useAdminUsers, useDeleteAdminUser } from "@/use-queries/admin";
-import { MenuItem, MenuCategory, AdminUser } from "@/types/api";
+import { MenuItem, AdminUser } from "@/types/api";
 import MenuItemForm from "./menu-item-form";
 import AdminUserForm from "./admin-user-form";
 import {
@@ -19,10 +19,12 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAdminLogout } from "@/use-queries/admin";
+import { useRouter } from "next/navigation";
 
 type TabType = "menu" | "users";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("menu");
   const [showMenuItemForm, setShowMenuItemForm] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | undefined>();
@@ -89,70 +91,93 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">🍔</span>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Burger House Admin
-              </h1>
-            </div>
+    <div className="min-h-screen bg-brand-cream">
+      {/* Beautiful Aesthetic Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark backdrop-blur-md border-b border-brand-orange/20 shadow-lg">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          {/* Left side - Brand */}
+          <div className="flex items-center space-x-4">
+            {/* Logo with elegant frame - Clickable */}
             <button
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => router.push("/")}
+              className="relative group cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
-              <span>
-                {logoutMutation.isPending ? "Logging out..." : "Logout"}
-              </span>
+              <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-0.5 group-hover:bg-white/20 transition-all duration-200">
+                <img
+                  src="/logo.png"
+                  alt="Burger House Logo"
+                  className="w-full h-full object-cover rounded-lg scale-110"
+                />
+              </div>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 rounded-xl bg-brand-orange/20 blur-sm -z-10 group-hover:bg-brand-orange/30 transition-all duration-200"></div>
             </button>
+
+            {/* Brand name with elegant styling */}
+            <div className="flex flex-col">
+              <h1 className="font-coolvetica text-2xl font-light text-white tracking-wide">
+                Burger House
+              </h1>
+              <div className="h-px w-16 bg-gradient-to-r from-brand-orange to-transparent mt-1"></div>
+            </div>
           </div>
+
+          {/* Right side - Logout */}
+          <button
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+            className="flex items-center space-x-2 px-4 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm border border-white/20"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="font-coolvetica">
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
+            </span>
+          </button>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-8">
+      <div className="max-w-7xl mx-auto px-6 pt-28 pb-16">
+        {/* Elegant Tabs */}
+        <div className="flex space-x-2 bg-white/60 backdrop-blur-sm p-2 rounded-2xl mb-8 border border-white/20 shadow-lg">
           <button
             onClick={() => setActiveTab("menu")}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
+            className={`flex items-center space-x-3 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
               activeTab === "menu"
-                ? "bg-white text-orange-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white shadow-lg"
+                : "text-brand-dark hover:text-brand-brown hover:bg-white/40"
             }`}
           >
-            <MenuIcon className="w-4 h-4" />
-            <span>Menu Items</span>
+            <MenuIcon className="w-5 h-5" />
+            <span className="font-coolvetica">Menu Items</span>
           </button>
           <button
             onClick={() => setActiveTab("users")}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
+            className={`flex items-center space-x-3 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
               activeTab === "users"
-                ? "bg-white text-orange-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white shadow-lg"
+                : "text-brand-dark hover:text-brand-brown hover:bg-white/40"
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>Admin Users</span>
+            <Users className="w-5 h-5" />
+            <span className="font-coolvetica">Admin Users</span>
           </button>
         </div>
 
         {/* Menu Items Tab */}
         {activeTab === "menu" && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Menu Items</h2>
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="font-coolvetica text-3xl font-light text-brand-dark tracking-wide mb-2">
+                  Menu Items
+                </h2>
+                <div className="h-px w-20 bg-gradient-to-r from-brand-orange to-transparent"></div>
+              </div>
               <button
                 onClick={handleAddItem}
-                className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                className="flex items-center space-x-3 bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white px-6 py-3 rounded-xl hover:from-brand-brown hover:via-brand-orange hover:to-brand-brown transition-all duration-300 shadow-lg font-coolvetica"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 <span>Add Item</span>
               </button>
             </div>
@@ -162,7 +187,7 @@ export default function AdminDashboard() {
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div
                     key={index}
-                    className="bg-white rounded-lg shadow-sm p-6 animate-pulse"
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 animate-pulse"
                   >
                     <div className="h-4 bg-gray-200 rounded mb-3"></div>
                     <div className="h-3 bg-gray-200 rounded mb-2"></div>
@@ -175,25 +200,25 @@ export default function AdminDashboard() {
                 {menuItems.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white rounded-lg shadow-sm p-6"
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="font-coolvetica text-xl font-light text-brand-dark tracking-wide">
                         {item.name}
                       </h3>
-                      <span className="text-lg font-bold text-orange-600">
+                      <span className="font-coolvetica text-xl font-light text-brand-brown">
                         ${parseFloat(item.price.toString()).toFixed(2)}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="text-brand-brown/80 text-sm mb-4 line-clamp-2 font-light flex-1">
                       {item.description}
                     </p>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mt-auto">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium ${
                           item.isAvailable
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-green-50/80 text-green-700 border border-green-200/50"
+                            : "bg-red-50/80 text-red-700 border border-red-200/50"
                         }`}
                       >
                         {item.isAvailable ? "Available" : "Unavailable"}
@@ -201,13 +226,13 @@ export default function AdminDashboard() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEditItem(item)}
-                          className="p-2 text-gray-400 hover:text-orange-600 transition-colors"
+                          className="p-2.5 text-brand-brown/60 hover:text-brand-brown hover:bg-brand-cream/50 rounded-xl transition-all duration-200"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteItem(item.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                          className="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50/50 rounded-xl transition-all duration-200"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -223,13 +248,18 @@ export default function AdminDashboard() {
         {/* Admin Users Tab */}
         {activeTab === "users" && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Admin Users</h2>
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="font-coolvetica text-3xl font-light text-brand-dark tracking-wide mb-2">
+                  Admin Users
+                </h2>
+                <div className="h-px w-20 bg-gradient-to-r from-brand-orange to-transparent"></div>
+              </div>
               <button
                 onClick={handleAddUser}
-                className="flex items-center space-x-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                className="flex items-center space-x-3 bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark text-white px-6 py-3 rounded-xl hover:from-brand-brown hover:via-brand-orange hover:to-brand-brown transition-all duration-300 shadow-lg font-coolvetica"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 <span>Add User</span>
               </button>
             </div>
@@ -239,7 +269,7 @@ export default function AdminDashboard() {
                 {Array.from({ length: 3 }).map((_, index) => (
                   <div
                     key={index}
-                    className="bg-white rounded-lg shadow-sm p-6 animate-pulse"
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 animate-pulse"
                   >
                     <div className="h-4 bg-gray-200 rounded mb-2"></div>
                     <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -251,19 +281,21 @@ export default function AdminDashboard() {
                 {adminUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="bg-white rounded-lg shadow-sm p-6"
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="font-coolvetica text-xl font-light text-brand-dark tracking-wide mb-1">
                           {user.name}
                         </h3>
-                        <p className="text-gray-600">{user.email}</p>
+                        <p className="text-brand-brown/80 font-light mb-3">
+                          {user.email}
+                        </p>
                         <span
-                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-2 ${
-                            user.role === "admin"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-blue-100 text-blue-800"
+                          className={`inline-block px-3 py-1.5 rounded-full text-xs font-medium ${
+                            user.role === "ADMIN"
+                              ? "bg-purple-50/80 text-purple-700 border border-purple-200/50"
+                              : "bg-blue-50/80 text-blue-700 border border-blue-200/50"
                           }`}
                         >
                           {user.role}
@@ -272,13 +304,13 @@ export default function AdminDashboard() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEditUser(user)}
-                          className="p-2 text-gray-400 hover:text-orange-600 transition-colors"
+                          className="p-2.5 text-brand-brown/60 hover:text-brand-brown hover:bg-brand-cream/50 rounded-xl transition-all duration-200"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user.id)}
-                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                          className="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50/50 rounded-xl transition-all duration-200"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

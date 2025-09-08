@@ -15,25 +15,31 @@ export default function CategorySelector({
   onCategoryChange,
 }: CategorySelectorProps) {
   const allCategories = [
-    { id: "all", name: "All Items", description: "View all menu items" },
+    {
+      id: "all",
+      name: "All Items",
+      description: "View all menu items",
+    },
     ...categories.filter((cat) => cat.isActive),
   ];
 
   return (
-    <div className="flex flex-wrap gap-3 justify-center mb-12">
-      {allCategories.map((category) => (
-        <button
-          key={category.id}
-          onClick={() => onCategoryChange(category.id)}
-          className={`px-6 py-3 rounded-full font-medium transition-all duration-200 ${
-            selectedCategory === category.id
-              ? "bg-orange-600 text-white shadow-lg shadow-orange-200"
-              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-orange-300"
-          }`}
-        >
-          {category.name}
-        </button>
-      ))}
+    <div className="mb-12">
+      <div className="flex flex-wrap gap-2 justify-center">
+        {allCategories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => onCategoryChange(category.id)}
+            className={`px-5 py-2 rounded-full font-medium transition-all duration-300 ${
+              selectedCategory === category.id
+                ? "bg-brand-orange text-white shadow-sm"
+                : "bg-white/60 text-brand-brown hover:bg-brand-orange/10 hover:text-brand-dark border border-brand-orange/20"
+            }`}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

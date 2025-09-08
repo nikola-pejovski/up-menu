@@ -4,10 +4,17 @@ export interface MenuItem {
   description: string;
   price: number;
   image: string;
-  category: string;
+  category?: MenuCategory;
   isAvailable: boolean;
+  isFeatured: boolean;
   ingredients?: string[];
   allergens?: string[];
+  nutritionInfo?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -27,7 +34,7 @@ export interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "manager";
+  role: "ADMIN" | "MANAGER";
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -50,6 +57,7 @@ export interface CreateMenuItemDto {
   image: string;
   category: string;
   isAvailable: boolean;
+  isFeatured?: boolean;
   ingredients?: string[];
   allergens?: string[];
 }
@@ -74,7 +82,7 @@ export interface CreateAdminUserDto {
   email: string;
   name: string;
   password: string;
-  role: "admin" | "manager";
+  role: "ADMIN" | "MANAGER";
 }
 
 export interface UpdateAdminUserDto extends Partial<CreateAdminUserDto> {

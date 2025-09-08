@@ -10,6 +10,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Elegant brand colors
+        brand: {
+          dark: "#2D3748",
+          brown: "#8B7355",
+          orange: "#E2A865",
+          cream: "#F7F5F3",
+          sage: "#9CAF88",
+        },
         primary: {
           50: "#fff7ed",
           100: "#ffedd5",
@@ -39,6 +47,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
+        coolvetica: ["Coolvetica", "Arial Black", "Arial", "sans-serif"],
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-in-out",

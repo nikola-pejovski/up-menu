@@ -615,7 +615,7 @@ export class AuthService {
     }
 
     // Prepare update data
-    const updateData: any = { ...data };
+    const updateData: Record<string, unknown> = { ...data };
 
     // Hash password if provided
     if (data.password) {

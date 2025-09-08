@@ -172,12 +172,22 @@ export function handleValidationError(
   const method = request.method;
 
   // Create user-friendly error messages
-  const userFriendlyErrors = errors.map((error: any) => {
-    if (error.path && error.message) {
-      const field = error.path.join(".");
-      return `${field}: ${error.message}`;
+  const userFriendlyErrors = errors.map((error: unknown) => {
+    if (
+      error &&
+      typeof error === "object" &&
+      "path" in error &&
+      "message" in error
+    ) {
+      const errorWithPath = error as { path: string[]; message: string };
+      const field = errorWithPath.path.join(".");
+      return `${field}: ${errorWithPath.message}`;
     }
-    return error.message || "Invalid input";
+    if (error && typeof error === "object" && "message" in error) {
+      const errorWithMessage = error as { message: string };
+      return errorWithMessage.message;
+    }
+    return "Invalid input";
   });
 
   const errorResponse: ErrorResponse = {

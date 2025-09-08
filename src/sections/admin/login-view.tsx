@@ -38,28 +38,36 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-brand-cream flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">🍔</span>
+          <div className="relative">
+            <div className="w-32 h-32 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-0.5">
+              <img
+                src="/logo.png"
+                alt="Burger House Logo"
+                className="w-full h-full object-cover rounded-lg scale-110"
+              />
+            </div>
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 rounded-xl bg-brand-orange/20 blur-sm -z-10"></div>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-2 text-center font-coolvetica text-3xl font-light text-brand-dark tracking-wide">
           Burger House Admin
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-brand-brown font-light">
           Sign in to access the admin panel
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg border border-gray-100/50 sm:rounded-2xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-brand-dark font-coolvetica"
               >
                 Email address
               </label>
@@ -70,7 +78,7 @@ export default function LoginView() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200 sm:text-sm"
                   placeholder="Enter your email"
                 />
                 {errors.email && (
@@ -84,7 +92,7 @@ export default function LoginView() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-brand-dark font-coolvetica"
               >
                 Password
               </label>
@@ -95,7 +103,7 @@ export default function LoginView() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="appearance-none block w-full px-4 py-3 pr-12 border border-gray-200/50 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-orange/20 focus:border-brand-orange/50 bg-white/60 backdrop-blur-sm transition-all duration-200 sm:text-sm"
                   placeholder="Enter your password"
                 />
                 <button
@@ -118,8 +126,8 @@ export default function LoginView() {
             </div>
 
             {loginMutation.error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <p className="text-sm text-red-600">
+              <div className="bg-red-50/80 border border-red-200/50 rounded-xl p-4 backdrop-blur-sm">
+                <p className="text-sm text-red-600 font-light">
                   {loginMutation.error.message || "Invalid email or password"}
                 </p>
               </div>
@@ -129,7 +137,7 @@ export default function LoginView() {
               <button
                 type="submit"
                 disabled={loginMutation.isPending}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-brand-dark via-brand-brown to-brand-dark hover:from-brand-brown hover:via-brand-orange hover:to-brand-brown focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-coolvetica"
               >
                 {loginMutation.isPending ? "Signing in..." : "Sign in"}
               </button>
