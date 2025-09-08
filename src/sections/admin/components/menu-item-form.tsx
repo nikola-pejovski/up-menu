@@ -58,7 +58,10 @@ export default function MenuItemForm({
       description: item?.description || "",
       price: item?.price || 0,
       image: item?.image || "",
-      categoryId: item?.category?.id || (item as unknown as Record<string, unknown>).categoryId as string || "",
+      categoryId:
+        item?.category?.id ||
+        ((item as unknown as Record<string, unknown>).categoryId as string) ||
+        "",
       isAvailable: item?.isAvailable ?? true,
       isFeatured: item?.isFeatured ?? false,
       ingredients: item?.ingredients || [],
@@ -124,7 +127,10 @@ export default function MenuItemForm({
   // Update form values when item changes (for editing)
   useEffect(() => {
     if (item) {
-      const categoryId = item.category?.id || (item as unknown as Record<string, unknown>).categoryId as string || "";
+      const categoryId =
+        item.category?.id ||
+        ((item as unknown as Record<string, unknown>).categoryId as string) ||
+        "";
 
       // Reset form with new values
       reset({
