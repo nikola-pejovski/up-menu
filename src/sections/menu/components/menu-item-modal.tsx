@@ -1,6 +1,7 @@
 import { MenuItem } from "@/types/api";
 import FallbackImage from "@/components/fallback-image";
 import { X } from "lucide-react";
+import { useEffect } from "react";
 
 interface MenuItemModalProps {
   item: MenuItem | null;
@@ -13,6 +14,20 @@ export default function MenuItemModal({
   isOpen,
   onClose,
 }: MenuItemModalProps) {
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen || !item) return null;
 
   return (

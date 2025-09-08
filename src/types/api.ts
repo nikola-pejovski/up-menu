@@ -55,7 +55,7 @@ export interface CreateMenuItemDto {
   description: string;
   price: number;
   image: string;
-  category: string;
+  categoryId: string;
   isAvailable: boolean;
   isFeatured?: boolean;
   ingredients?: string[];

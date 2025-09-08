@@ -4,10 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  MenuItem,
-  MenuCategory,
-} from "@/types/api";
+import { MenuItem, MenuCategory } from "@/types/api";
 import { useCreateMenuItem, useUpdateMenuItem } from "@/use-queries/menu";
 import { X, Plus } from "lucide-react";
 import CustomSelect from "@/components/ui/custom-select";
@@ -17,7 +14,7 @@ const menuItemSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.number().min(0, "Price must be positive"),
   image: z.string().url("Please enter a valid image URL"),
-  category: z.string().min(1, "Category is required"),
+  categoryId: z.string().min(1, "Category is required"),
   isAvailable: z.boolean(),
   isFeatured: z.boolean().optional(),
   ingredients: z.array(z.string()).optional(),
@@ -53,6 +50,7 @@ export default function MenuItemForm({
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<MenuItemFormData>({
     resolver: zodResolver(menuItemSchema),
     defaultValues: {
@@ -60,10 +58,7 @@ export default function MenuItemForm({
       description: item?.description || "",
       price: item?.price || 0,
       image: item?.image || "",
-      category:
-        typeof item?.category === "string"
-          ? item.category
-          : item?.category?.id || "",
+      categoryId: item?.category?.id || (item as unknown as Record<string, unknown>).categoryId as string || "",
       isAvailable: item?.isAvailable ?? true,
       isFeatured: item?.isFeatured ?? false,
       ingredients: item?.ingredients || [],
@@ -85,7 +80,7 @@ export default function MenuItemForm({
         await createMutation.mutateAsync(formData);
       }
       onClose();
-    } catch (error) {
+    } catch {
       // Error handling is done in the mutation
     }
   };
@@ -114,29 +109,60 @@ export default function MenuItemForm({
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   // Update form values when item changes (for editing)
   useEffect(() => {
     if (item) {
-      setValue("name", item.name);
-      setValue("description", item.description);
-      setValue("price", item.price);
-      setValue("image", item.image);
-      setValue(
-        "category",
-        typeof item.category === "string"
-          ? item.category
-          : item.category?.id || ""
-      );
-      setValue("isAvailable", item.isAvailable);
-      setValue("isFeatured", item.isFeatured || false);
+      const categoryId = item.category?.id || (item as unknown as Record<string, unknown>).categoryId as string || "";
+
+      // Reset form with new values
+      reset({
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        image: item.image,
+        categoryId: categoryId,
+        isAvailable: item.isAvailable,
+        isFeatured: item.isFeatured || false,
+        ingredients: item.ingredients || [],
+        allergens: item.allergens || [],
+      });
       setIngredients(item.ingredients || []);
       setAllergens(item.allergens || []);
+    } else {
+      // Reset form for new item
+      reset({
+        name: "",
+        description: "",
+        price: 0,
+        image: "",
+        categoryId: "",
+        isAvailable: true,
+        isFeatured: false,
+        ingredients: [],
+        allergens: [],
+      });
+      setIngredients([]);
+      setAllergens([]);
     }
-  }, [item, setValue]);
+  }, [item, reset]);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20">
+      {/* Backdrop - click outside to close */}
+      <div className="absolute inset-0" onClick={onClose} />
+      <div className="relative bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20">
         <div className="flex items-center justify-between p-6 border-b border-brand-orange/20">
           <div>
             <h2 className="font-coolvetica text-2xl font-light text-brand-dark tracking-wide">
@@ -235,13 +261,13 @@ export default function MenuItemForm({
                   label: category.name,
                 })),
               ]}
-              value={watch("category") || ""}
-              onChange={(value) => setValue("category", value)}
+              value={watch("categoryId") || ""}
+              onChange={(value) => setValue("categoryId", value)}
               placeholder="Select a category"
             />
-            {errors.category && (
+            {errors.categoryId && (
               <p className="mt-1 text-sm text-red-600">
-                {errors.category.message}
+                {errors.categoryId.message}
               </p>
             )}
           </div>
